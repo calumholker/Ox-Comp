@@ -1,0 +1,444 @@
+%
+% CO5x report LaTeX example - NTC Nov2011
+%
+
+\documentclass[a4paper,11pt]{article}
+\usepackage{graphicx}
+\usepackage{caption}
+\captionsetup{justification=centering,font={small,sf}}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.3}
+\usepackage{hyperref}
+\usepackage{siunitx}
+\usepackage{commath}
+\usepackage{mathtools}
+\usepackage{color}
+\usepackage{listings}
+
+\usetikzlibrary{plotmarks}
+
+\definecolor{javared}{rgb}{0.6,0,0} % for strings
+\definecolor{javagreen}{rgb}{0.25,0.5,0.35} % comments
+\definecolor{javapurple}{rgb}{0.5,0,0.35} % keywords
+\definecolor{javadocblue}{rgb}{0.25,0.35,0.75} % javadoc
+ 
+\lstset{language=Java,
+basicstyle=\ttfamily,
+keywordstyle=\color{javapurple}\bfseries,
+stringstyle=\color{javared},
+commentstyle=\color{javagreen},
+morecomment=[s][\color{javadocblue}]{/**}{*/},
+tabsize=4,
+showspaces=false,
+showstringspaces=false}
+
+\setlength{\voffset}{-25mm}
+\setlength{\hoffset}{-10mm}
+\setlength{\oddsidemargin}{0mm}
+\setlength{\evensidemargin}{0mm}
+
+\setlength{\marginparwidth}{0mm}
+\addtolength{\textwidth}{50mm}
+\addtolength{\textheight}{55mm}
+
+\begin{document}
+
+\begin{center}
+\Large{\textbf{CO5x: Disease Spread}}\\ 
+\vspace{1em}
+\large{A. N. Student}\\
+\large{Some College}
+\end{center}
+
+\section{Abstract}
+
+We calculate the spread of disease in two populations, both with and without immunity, 
+given known infection and recovery parameters using a simple model for disease spread.
+The numbers of people susceptible, infected and recovered from the disease is plotted 
+as a function of time. In both populations disease spread is rapid. In the immune case 
+infections decrease steadily. Without immunity a steady state of infection is observed to be established.
+
+\section{Introduction}
+
+We assume that the disease starts with a small ($\approx 0.001$) percentage 
+of the population, which we categorise as either susceptible to the disease, 
+$S(t)$, infected, $I(t)$ or those who have recovered from the disease and 
+are now immune (post-infected), $P(t)$. (We are making the assumption that everyone is 
+susceptible to the disease at the start of the outbreak and no-one has a 
+natural immunity).
+
+The population is closed i.e.\ we have no flow of individuals into or out of the 
+population so 
+\begin{equation}
+   S(t)\ +\ I(t)\ +\ P(t)\ =\ \text{constant}
+\end{equation}
+
+To simplify the spread of the disease we assume that when a susceptible person
+comes in contact with an infected one there is a (constant) probability $k_1$ of 
+the susceptible contracting the disease giving us an expression for the rate of 
+change of the susceptible population.
+\begin{equation}
+\od{S}{t} = -k_1S(t)I(t)
+\end{equation}
+ 
+We further assume that there is also a recovery constant $k_2$ which determines 
+how quickly an individual recovers from the disease. Thus the number of infected
+individuals grows as the number of susceptibles decreases and the infecteds 
+decrease as they recover from the disease. This gives us the following formula 
+for the rate of change of the infected population.
+\begin{equation}
+\od{I}{t} = k_1S(t)I(t) - k_2I(t)
+\end{equation}
+
+Finally, the number of individuals who have recovered (post-infected) increase
+as the number of infected decrease giving us our final equation.
+\begin{equation}
+\od{P}{t} = k_2I(t)
+\end{equation}
+
+The relationships between those susceptible, infected and post-infected are given
+by the following differential equations:
+\begin{eqnarray}
+   \dod{S}{t} &=& -k_1SI         \nonumber \\
+   \dod{I}{t} &=& k_1SI - k_2I   \nonumber \\
+   \dod{P}{t} &=& k_2I
+\label{eqn:model_1}
+\end{eqnarray}
+
+The values of $k_1 = \num{e-5}$ and $k_2 = 0.38$ are used for the infected and 
+recovery constants.
+
+Our derivation makes the assumption that once a person has recovered from 
+the disease then they can not become re-infected. However a rapidly mutating 
+disease can overcome the immune system of an individual making then susceptible 
+again (like the common cold every winter). To model this in our equations, we 
+introduce a new `re-infection' constant $k_3$. The number of individuals 
+becoming infected remains the same but the number of susceptibles increase as 
+the number of post-infected decrease and vice versa. This modifies our previous 
+equations~\ref{eqn:model_1} to
+\begin{eqnarray}
+\dod{S}{t} &=& -k_1S(t)I(t) +k_3P(t)   \nonumber \\
+\dod{I}{t} &=& k_1S(t)I(t) - k_2I(t)   \nonumber \\
+\dod{P}{t} &=& k_2I(t) - k_3P(t)
+\label{eqn:model_2}
+\end{eqnarray}
+
+We use the value of $0.15$ for the re-infection constant $k_3$.
+
+\section{Solution}
+The equations given in equation~\ref{eqn:model_1} were solved using the Euler method, which is 
+stated as:
+\begin{equation}
+x_{n+1} = x_n + \Delta t \dod{x}{t}
+\end{equation}
+where $n$ is the time step such that $t = n\Delta t$. For the first model where the post-infected population is
+immune, this method is applied to $S(t)$, $I(t)$ and $P(t)$:
+\begin{eqnarray}
+S_{n+1} &=& S_n - \Delta t(k_1 S_n I_n)  \nonumber \\
+I_{n+1} &=& I_n + \Delta t(k_1 S_n I_n - k_2 I_n)  \nonumber \\
+P_{n+1} &=& P_n + \Delta t(k_2 I_n) 
+\end{eqnarray}
+where $S_0$, $I_0$, and $P_0$ are the initial values. For a total population of one million people, we take $S_0 = 999, 990, I_0 = 10$, and $P_0 = 0$, indicating an initial infection rate of $0.001\%$ and no immunity.
+
+In the second model, where recovered people can fall ill again, the formulae are modified as follows:
+\begin{eqnarray}
+S_{n+1} &=& S_n + \Delta t(-k_1 S_n I_n + k_3 P_n)  \nonumber \\
+I_{n+1} &=& I_n + \Delta t(k_1 S_n I_n - k_2 I_n)  \nonumber \\
+P_{n+1} &=& P_n + \Delta t(k_2 I_n - k_3 P_n) 
+\end{eqnarray}
+The initial conditions are the same as before.
+
+\section{Results}
+We solved the equations~\ref{eqn:model_1} to obtain the following graph (figure~\ref{fig:noreinfection})
+showing the relationship between susceptible, infected and post-infected people
+during an epidemic where post-infected individuals can not be re-infected.
+\begin{figure}[h!]
+   \centering
+\begin{tikzpicture}
+\begin{axis}[no markers,xlabel={Day},ylabel={Number infected},width=14cm,height=12cm,legend style={ at={(0.93,0.79)}, anchor=east},scaled y ticks = false,y tick label style={/pgf/number format/fixed,/pgf/number format/1000 sep={}},cycle list={{blue,solid},{green,dashed},{red,dotted}}]
+\addplot table [trim cells=true,y=value1]  {epidemic1.dat};
+\addlegendentry{Susceptible}
+\addplot table [dashed,trim cells=true,y=value2]  {epidemic1.dat};
+\addlegendentry{Infected}
+\addplot table [dotted,trim cells=true,y=value3]  {epidemic1.dat};
+\addlegendentry{Post-infected}
+\end{axis}
+\end{tikzpicture}
+\caption{An epidemic where post-infected individuals can not be re-infected.}
+\label{fig:noreinfection}
+\end{figure}
+We can see the number of susceptible people decrease as they become infected. The number 
+of post-infected people always increases as the disease spreads through the population
+and everyone has caught and recovered from it.
+
+The solution to the second model (equations~\ref{eqn:model_2}), illustrated in figure~\ref{fig:withreinfection}, shows a marked difference in the
+spread of disease. In this case the populations of susceptible, infected and 
+post-infected reaches a steady state as those susceptible become infected, recover 
+and become susceptible again.
+\begin{figure}[h!]
+   \centering
+\begin{tikzpicture}
+\begin{axis}[no markers,xlabel={Day},ylabel={Number infected},/pgf/number format/set thousands separator={},width=14cm,height=12cm,legend style={ at={(0.93,0.79)}, anchor=east},scaled y ticks = false,y tick label style={/pgf/number format/fixed},yticklabels={0,0,1000000,2000000,3000000,4000000,5000000},cycle list={{blue,solid},{green,dashed},{red,dotted}}]
+\addplot table [trim cells=true,y=value1]  {epidemic2.dat};
+\addlegendentry{Susceptible}
+\addplot table [dashed,trim cells=true,y=value2]  {epidemic2.dat};
+\addlegendentry{Infected}
+\addplot table [dotted,trim cells=true,y=value3]  {epidemic2.dat};
+\addlegendentry{Post-infected}
+\end{axis}
+\end{tikzpicture}
+\caption{An epidemic where post-infected individuals can be re-infected.}
+\label{fig:withreinfection}
+\end{figure}
+
+\section{Conclusion}
+
+The two computer models, the first with immunity and the second without, show the expected behaviour. In both models, because of the small infection rate, the disease progression starts slowly but picks up very rapidly. If the post-infection immunity to the disease is lasting, then the disease decreases steadily. However, if the disease can be caught again (such as through rapid mutation), it can establish itself in a steady fraction of the population. Steady-state infection in fact characterises some common illnesses, such as the common cold.
+
+\clearpage
+Nevertheless, the model contains certain simplifying assumptions. For instance:
+\begin{enumerate}
+\item{} The whole population is susceptible at the outbreak of the disease. This 
+        is not the case and so a new parameter can be added to $\od{S}{t}$ to 
+        allow for natural immunity. This parameter can decrease with time to allow
+        for an immune system being overwhelmed by continued contact with a disease.
+\item{} The disease is not fatal. This is not a defect in the model rather a
+        consequence of the disease we are looking at.
+\item{} The disease carrying organism is long lived. This is not the case in 
+        reality where the organisms have a live cycle of their own. The live, 
+        reproduce (if conditions are right) and they die. This life-cycle should 
+        also be represented in the model which would give us a sensitive dependance
+        on the initial parameters of the system. If the reinfection rate is high 
+        then there is a constant supply of 'food' for the organism, too low and
+        the 'food' runs out as individuals become immune. A similar situation
+        will occur if the infection rate is too low. The life time of the
+        disease will determine how fast the disease spreads, if the organism
+        dies before reaching a host then there is no second generation to 
+        carry on infecting the population. So it is possible for the disease
+        to either die out or to explode and kill everything by greatly 
+        outnumbering the hosts.
+\item{} The disease carrying organism is infinitely adaptable. Again this is
+        not the case in reality. An `infectibility' parameter should be introduced 
+        that determines the probability of an individual becoming infected if
+        subjected to the disease. The $k_1$ parameter above is, in reality, an
+        transmission parameter determining how the disease is transmitted 
+        amongst the population.
+\end{enumerate}
+
+Modifying these assumptions would make the model more realistic and could extend it to investigate diseases with different characteristics.
+
+\begin{thebibliography}{9}
+\bibitem{cmanual} C.\ W.\ Wiles, A.\ O'Hare et al, \emph{Physics C Programming  Course 2011--2012}, Oxford Physics, 2011\footnote{\href{http://www-teaching.physics.ox.ac.uk/computing/handbook_C.pdf}{\url{http://www-teaching.physics.ox.ac.uk/computing/handbook_C.pdf}}}.
+\end{thebibliography}
+
+\clearpage
+\appendix
+\renewcommand\thesection{Appendix \Alph{section}}
+
+\section{Source Code for Part 1}
+The source code for the first problem (where post infected people 
+can not be re-infected) is
+\begin{lstlisting}
+/**********************************************************
+ * CO5X: Disease Spread
+ * This program calculates the spread of disease in a 
+ * population given infections and recovery parameters.
+ *
+ * "This software uses the gnuplot_i library written by N.Devillard" 
+ *
+ **********************************************************/
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include "gnuplot_i.h"
+
+const double k1 = 0.00001;   /* infection constant */
+const double k2 = 0.38;      /* healing constant   */
+const double N  = 14.0;      /* days  */
+
+double susceptible(double s, double i)
+{
+   return -k1*s*i;
+}
+double infected(double s, double i)
+{
+   return k1*s*i - k2*i;
+}
+double immune(double i)
+{
+   return k2*i;
+}
+
+int main()
+{
+   double S, I, P, t;
+   double S_old, I_old;
+   double step = 1.0/48.0; /* step measured in days
+                          48 half-hour intervals in one day! */
+
+   FILE *fout;
+   gnuplot_ctrl *g;
+
+   g = gnuplot_init();
+
+   if ((fout=fopen("epidemic1.dat","w"))==NULL)
+   {
+      fprintf(stdout, "Cannot open epidemic1.dat\n");
+      exit (EXIT_FAILURE);
+   }
+
+   S_old = 999990.0;
+   I_old = 10.0;
+   P = 0.0;
+   t = 0.0;
+
+   /* use the Euler method to solve the equations at each point */
+   while (t<N)
+   {
+      S = S_old + step*susceptible(S_old, I_old);
+      I = I_old + step*infected(S_old, I_old);
+      P = P + step*immune(I_old);
+      t = t + step;
+      S_old = S;
+      I_old = I;
+      fprintf(fout, "%f\t%f\t%f\t%f\n", t,S,I,P);
+   }
+   fclose(fout);
+
+   /* plot the three curves on one graph */
+   gnuplot_cmd(g, "plot \'epidemic1.dat\' using 1:2 title 
+   				\'Susceptible\' with lines, 
+                        \'epidemic1.dat\' using 1:3 title 
+                        		\'Infected\' with lines, 
+                        \'epidemic1.dat\' using 1:4 title 
+                        		\'Post-Infected\' with lines");
+
+   /* Show the graph for 5 seconds before saving it as a postscript file */
+   sleep(5);
+   gnuplot_cmd(g, "set terminal postscript");
+   gnuplot_cmd(g, "set output \"epidemic_part1.ps\"");
+   gnuplot_cmd(g, "replot");
+
+   gnuplot_close(g);
+   
+
+   return 0;
+}
+\end{lstlisting}
+
+\section{Source Code for Part 2}
+The source code for the second problem (where post infected people 
+can be re-infected) is
+\begin{lstlisting}
+/**********************************************************
+ * CO5X: Disease Spread
+ * This program calculates the spread of disease in a 
+ * population given infections and recovery parameters.
+ *
+ * "This software uses the gnuplot_i library written by N.Devillard" 
+ *
+ **********************************************************/
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include "gnuplot_i.h"
+
+const double k1 = 0.00001;   /* infection constant */
+const double k2 = 0.38;      /* healing constant   */
+const double k3 = 0.15;      /* re-infection constant   */
+const double N  = 14.0;      /* days  */
+
+double susceptible(double s, double i, double p)
+{
+   return -k1*s*i + k3*p;
+}
+double infected(double s, double i)
+{
+   return k1*s*i - k2*i;
+}
+double immune(double i, double p)
+{
+   return k2*i - k3*p;
+}
+
+int main()
+{
+   double S, I, P, t;
+   double S_old, I_old, P_old;
+   double step = 1.0/48.0; /* step measured in days
+                          48 half-hour intervals in one day! */
+   FILE *fout;
+   gnuplot_ctrl *g;
+
+   g = gnuplot_init();
+
+   if ((fout=fopen("epidemic2.dat","w"))==NULL)
+   {
+      fprintf(stdout, "Cannot open epidemic2.dat\n");
+      exit (EXIT_FAILURE);
+   }
+
+   S_old = 999990.0;
+   I_old = 10.0;
+   P_old = 0.0;
+   t = 0.0;
+
+   /* use the Euler method to solve the equations at each point */
+   while (t<N)
+   {
+      S = S_old + step*susceptible(S_old, I_old, P_old);
+      I = I_old + step*infected(S_old, I_old);
+      P = P_old + step*immune(I_old, P_old);
+      t = t + step;
+      S_old = S;
+      I_old = I;
+      P_old = P;
+      fprintf(fout, "%f\t%f\t%f\t%f\n", t,S,I,P);
+   }
+   fclose(fout);
+
+   /* plot the three curves on one graph */
+   gnuplot_cmd(g, "plot \'epidemic2.dat\' using 1:2 title 
+   					\'Susceptible\' with lines, 
+                        \'epidemic2.dat\' using 1:3 title 
+                        			\'Infected\' with lines, 
+                        \'epidemic2.dat\' using 1:4 title 
+                        			\'Post-Infected\' with lines");
+
+   /* Show the graph for 5 seconds before saving it as a postscript file */
+   sleep(5);
+   gnuplot_cmd(g, "set terminal postscript");
+   gnuplot_cmd(g, "set output \"epidemic_part2.ps\"");
+   gnuplot_cmd(g, "replot");
+
+   gnuplot_close(g);
+   
+
+   return 0;
+}
+\end{lstlisting}
+
+\section{Makefile for project}
+The explanation of the makefile can be found in appendix B of \cite{cmanual}
+\begin{lstlisting}
+CC 	= gcc
+CFLAGS 	= -Wall -O
+RM	= rm -f
+
+all:	epidemic_p1 epidemic_p2 
+
+epidemic_p1:	gnuplot_i.o epidemic_p1.o
+	$(CC) $(CFLAGS) -o epidemic_p1 epidemic_p1.o gnuplot_i.o -lm
+
+epidemic_p2:	gnuplot_i.o epidemic_p2.o
+	$(CC) $(CFLAGS) -o epidemic_p2 epidemic_p2.o gnuplot_i.o -lm
+
+clean:
+	$(RM) *.o epidemic_p1 epidemic_p2 *.dat
+
+# compile .c files into .o files
+%.o : %.cc
+	$(CC) -c $(CFLAGS) $< -o $@
+\end{lstlisting}
+
+\end{document}
